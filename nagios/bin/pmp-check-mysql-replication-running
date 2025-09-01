@@ -63,14 +63,14 @@ main() {
    if [ -z "$1" ]; then
       if [ "${OPT_MASTERCONN}" ]; then
          # MariaDB multi-source replication
-         mysql_exec "SHOW SLAVE '${OPT_MASTERCONN}' STATUS\G" > "${TEMP}"
+         mysql_exec "SHOW REPLICA '${OPT_MASTERCONN}' STATUS\G" > "${TEMP}"
       elif [ "${OPT_CHANNEL}" ]; then
-        mysql_exec "SHOW SLAVE STATUS FOR CHANNEL '${OPT_CHANNEL}'\G" > "${TEMP}" 
+        mysql_exec "SHOW REPLICA STATUS FOR CHANNEL '${OPT_CHANNEL}'\G" > "${TEMP}" 
       else
-         # Leverage lock-free SHOW SLAVE STATUS if available
-         mysql_exec "SHOW SLAVE STATUS NONBLOCKING\G" > "${TEMP}" 2>/dev/null ||
-         mysql_exec "SHOW SLAVE STATUS NOLOCK\G" > "${TEMP}" 2>/dev/null ||
-         mysql_exec "SHOW SLAVE STATUS\G" > "${TEMP}"
+         # Leverage lock-free SHOW REPLICA STATUS if available
+         mysql_exec "SHOW REPLICA STATUS NONBLOCKING\G" > "${TEMP}" 2>/dev/null ||
+         mysql_exec "SHOW REPLICA STATUS NOLOCK\G" > "${TEMP}" 2>/dev/null ||
+         mysql_exec "SHOW REPLICA STATUS\G" > "${TEMP}"
       fi
    else
       # This is just for testing.  /dev/null it.
@@ -78,7 +78,7 @@ main() {
    fi
 
    if [ $? = 0 ]; then
-      # SHOW SLAVE STATUS isn't an error if the server isn't a replica. The file
+      # SHOW REPLICA STATUS isn't an error if the server isn't a replica. The file
       # will be empty if that happens.
       if [ -s "${TEMP}" ]; then
          NOTE=$(awk '$1 ~ /_Running:|Last_Error:/{print substr($0, 1, 100)}' "${TEMP}")
@@ -86,9 +86,9 @@ main() {
             NOTE="CRIT $NOTE"
          # pt-slave-delayed slave
          elif [ -n "${OPT_DELD}" ] &&
-              grep 'Slave_IO_Running: Yes' "${TEMP}" >/dev/null 2>&1 &&
-              grep 'Slave_SQL_Running: No' "${TEMP}" >/dev/null 2>&1; then
-            NOTE="OK (delayed slave) $NOTE"
+              grep 'Replica_IO_Running: Yes' "${TEMP}" >/dev/null 2>&1 &&
+              grep 'Replica_SQL_Running: No' "${TEMP}" >/dev/null 2>&1; then
+            NOTE="OK (delayed replica) $NOTE"
          elif egrep "_Running: (No|Connecting)" "${TEMP}" >/dev/null 2>&1; then
             if [ "${OPT_CRIT}" ]; then
                NOTE="CRIT $NOTE"
@@ -165,7 +165,7 @@ pmp-check-mysql-replication-running - Alert when MySQL replication stops.
     -c CRIT         Report CRITICAL when replication is stopped with or w/o errors.
     --defaults-file FILE Only read mysql options from the given file.
                     Defaults to /etc/nagios/mysql.cnf if it exists.
-    -d              Useful for slaves delayed by pt-slave-delay. It will not alert
+    -d              Useful for replicas delayed by pt-slave-delay. It will not alert
                     when IO thread is running, SQL one is not and no errors.
     -H HOST         MySQL hostname.
     -l USER         MySQL username.
@@ -173,7 +173,7 @@ pmp-check-mysql-replication-running - Alert when MySQL replication stops.
     -p PASS         MySQL password.
     -P PORT         MySQL port.
     -S SOCKET       MySQL socket file.
-    -w WARN         Report WARNING when SHOW SLAVE STATUS output is empty.
+    -w WARN         Report WARNING when SHOW REPLICA STATUS output is empty.
     --master-conn NAME  Master connection name for MariaDB multi-source replication.
     --channel NAME  Master channel name for multi-source replication (MySQL 5.7.6+).
     --help          Print help and exit.
@@ -195,14 +195,14 @@ with Nagios plugin conventions, but they don't work as thresholds.  Instead, if
 you specify a critical threshold, this plugin will treat it as critical if
 either thread is stopped, with or without an error.
 
-The warning threshold makes the plugin report a warning when SHOW SLAVE STATUS
+The warning threshold makes the plugin report a warning when SHOW REPLICA STATUS
 produces no output, which means it is not configured as a replica.  By default,
 this plugin will report that replication is healthy when a server isn't
 configured as a replica.
 
-If you want to run this check against the delayed slaves, e.g. those running
+If you want to run this check against the delayed replicas, e.g. those running
 with pt-slave-delay tool, you may want to specify -d option. It will not alert
-when Slave_IO_Running is Yes, Slave_SQL_Running is No and there are no errors.
+when Replica_IO_Running is Yes, Replica_SQL_Running is No and there are no errors.
 
 =head1 PRIVILEGES
 
@@ -212,7 +212,7 @@ This plugin executes the following commands against MySQL:
 
 =item *
 
-C<SHOW SLAVE STATUS [NONBLOCKING|NOLOCK]>
+C<SHOW REPLICA STATUS [NONBLOCKING|NOLOCK]>
 
 =back
 
