@@ -143,5 +143,8 @@ echo "Templates are installed to /usr/share/cacti/resource/percona"
 
 
 %changelog
+* Mon Sep  1 2025 <fredric.johansson@scilifelab.se> 1.1.9
+- Use replica instead of slave as it's removed in mysql 8.4
+
 * Thu Dec  1 2016 <evgeniy.patlan@percona.com> 1.1.7
 - Initial Package
