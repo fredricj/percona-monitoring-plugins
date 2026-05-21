@@ -143,6 +143,9 @@ echo "Templates are installed to /usr/share/cacti/resource/percona"
 
 
 %changelog
+* Thu May 21 2026 <fredric.johansson@scilifelab.se> 1.1.10
+- Replace master_ prefix with source_ in pmp-check-pt-table-checksum
+
 * Mon Sep  1 2025 <fredric.johansson@scilifelab.se> 1.1.9
 - Use replica instead of slave as it's removed in mysql 8.4
 
