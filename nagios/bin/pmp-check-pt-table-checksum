@@ -186,8 +186,8 @@ server's data matches its master's:
       ' tables, including ',
       MIN(CONCAT(db, '.', tbl)))
    FROM CHECKSUM_TABLE
-   WHERE master_cnt <> this_cnt OR master_crc <> this_crc
-      OR ISNULL(master_crc) <> ISNULL(this_crc)
+   WHERE source_cnt <> this_cnt OR source_crc <> this_crc
+      OR ISNULL(source_crc) <> ISNULL(this_crc)
    HAVING COUNT(*) > 0
 
 The word CHECKSUM_TABLE is replaced by the value of the -T option.  If the table
