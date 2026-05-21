@@ -40,5 +40,8 @@ echo "Plugins are installed to %{_libdir}/nagios/plugins"
 %{_libdir}/nagios/plugins/*
 
 %changelog
+* Thu May 21 2026 <fredric.johansson@scilifelab.se> 1.1.10
+- Replace master_ prefix with source_ in pmp-check-pt-table-checksum
+
 * Fri Jan 22 2013 <roman.vynar@percona.com> 1.0.2
 - Initial Package
